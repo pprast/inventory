@@ -75,6 +75,12 @@ namespace inventory
                     }
                     conn.Close();
                 }
+                // Обновление teachersBindingSource
+                teachersBindingSource.ResetBindings(false);
+
+                // Обновление teachersDataGridView
+                teachersDataGridView.Refresh();
+
 
                 // Очистка текстовых полей
                 teacher_name.Text = "";
@@ -85,56 +91,65 @@ namespace inventory
 
         private void teacher_delete_Click(object sender, EventArgs e)
         {
-            // Получение teacher_id из текстового поля
-            int teacher_id = int.Parse(teacher_idTextBox.Text);
-
-            // Создание соединения с базой данных
-            SqlConnection connection = new SqlConnection(connectionString);
-
-            try
+            // Проверяем, выбрана ли строка в таблице
+            if (teachersDataGridView.SelectedRows.Count == 0)
             {
-                // Открытие соединения
-                connection.Open();
+                MessageBox.Show("Выберите строку для удаления.");
+                return;
+            }
 
-                // Создание команды SQL для удаления записи
-                SqlCommand command = new SqlCommand();
-                command.Connection = connection;
-                command.CommandText = "DELETE FROM teachers WHERE teacher_id = @teacher_id";
-                command.Parameters.AddWithValue("@teacher_id", teacher_id);
+            // Получаем значение первичного ключа выбранной записи
+            int teacher_id = Convert.ToInt32(teachersDataGridView.SelectedRows[0].Cells[0].Value);
 
-                // Выполнение команды SQL
-                command.ExecuteNonQuery();
-
-                // Очистка текстового поля
-                teacher_idTextBox.Text = "";
-
-                // Оповещение пользователя об успешном удалении записи
-                MessageBox.Show("Teacher record deleted successfully.");
-
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                using (SqlCommand cmd = conn.CreateCommand())
+            // Создаем подключение к базе данных
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
                 {
-                    cmd.CommandText = "SELECT * FROM teachers";
-                    cmd.CommandType = CommandType.Text;
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    // Открываем соединение с базой данных
+                    connection.Open();
+
+                    // Создаем SQL-запрос на удаление записи
+                    string query = $"DELETE FROM teachers WHERE teacher_id = {teacher_id};";
+
+                    // Создаем объект SqlCommand для выполнения SQL-запроса
+                    SqlCommand command = new SqlCommand(query, connection);
+
+                    // Выполняем SQL-запрос на удаление записи
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Проверяем, удалена ли запись
+                    if (rowsAffected > 0)
                     {
-                        DataTable dt = new DataTable();
-                        dt.Load(reader);
-                        teachersDataGridView.DataSource = dt;
+                        // Выводим сообщение об успешном удалении записи
+                        MessageBox.Show("Запись успешно удалена из таблицы teachers.");
+
+                        using (SqlConnection conn = new SqlConnection(connectionString))
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = "SELECT * FROM teachers";
+                            cmd.CommandType = CommandType.Text;
+                            conn.Open();
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                DataTable dt = new DataTable();
+                                dt.Load(reader);
+                                teachersDataGridView.DataSource = dt;
+                            }
+                            conn.Close();
+                        }
                     }
-                    conn.Close();
+                    else
+                    {
+                        // Выводим сообщение об ошибке при удалении записи
+                        MessageBox.Show("Не удалось удалить запись из таблицы teachers.");
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                // Вывод ошибки при возникновении исключения
-                MessageBox.Show("Error deleting teacher record: " + ex.Message);
-            }
-            finally
-            {
-                // Закрытие соединения
-                connection.Close();
+                catch (Exception ex)
+                {
+                    // Выводим сообщение об ошибке при удалении записи
+                    MessageBox.Show($"Ошибка при удалении записи из таблицы teachers: {ex.Message}");
+                }
             }
         }
 
@@ -186,49 +201,60 @@ namespace inventory
             }
         }
 
-
-        private void button4_Click(object sender, EventArgs e)
+        private void room_delete_Click(object sender, EventArgs e)
         {
-            if (!int.TryParse(room_idTextBox.Text, out int room_id))
+            // Проверяем, выбрана ли строка в таблице
+            if (room_info_viewDataGridView.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Invalid room ID");
+                MessageBox.Show("Выберите строку для удаления.");
                 return;
             }
 
-            try
+            // Получаем значение первичного ключа выбранной записи
+            int id = Convert.ToInt32(room_info_viewDataGridView.SelectedRows[0].Cells[0].Value);
+
+            // Создаем подключение к базе данных
+            string connectionString = "Data Source=DESKTOP-6HOINII;Initial Catalog=univer;Integrated Security=True";
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                using (SqlCommand command = new SqlCommand("DELETE FROM rooms WHERE room_id = @room_id", connection))
+                try
                 {
-                    command.Parameters.AddWithValue("@room_id", room_id);
+                    // Открываем соединение с базой данных
                     connection.Open();
+
+                    // Создаем SQL-запрос на удаление записи
+                    string query = $"DELETE FROM rooms WHERE room_id = {id};";
+
+                    // Создаем объект SqlCommand для выполнения SQL-запроса
+                    SqlCommand command = new SqlCommand(query, connection);
+
+                    // Выполняем SQL-запрос на удаление записи
                     int rowsAffected = command.ExecuteNonQuery();
 
-                    if (rowsAffected == 0)
+                    // Проверяем, удалена ли запись
+                    if (rowsAffected > 0)
                     {
-                        MessageBox.Show("Room not found");
+                        // Выводим сообщение об успешном удалении записи
+                        MessageBox.Show("Запись успешно удалена из таблицы rooms.");
+
+                        // Перезагружаем данные в таблице
+                        string selectQuery = "SELECT * FROM room_info_view";
+                        SqlDataAdapter adapter = new SqlDataAdapter(selectQuery, connection);
+                        DataTable table = new DataTable();
+                        adapter.Fill(table);
+                        room_info_viewDataGridView.DataSource = table;
                     }
                     else
                     {
-                        MessageBox.Show("Room deleted successfully");
-                    }
-
-                    using (SqlCommand selectCommand = new SqlCommand("SELECT * FROM room_info_view", connection))
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(selectCommand))
-                    {
-                        DataTable dt = new DataTable();
-                        adapter.Fill(dt);
-                        room_info_viewDataGridView.DataSource = dt;
+                        // Выводим сообщение об ошибке при удалении записи
+                        MessageBox.Show("Не удалось удалить запись из таблицы rooms.");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error deleting room: " + ex.Message);
-            }
-            finally
-            {
-                room_idTextBox.Text = "";
+                catch (Exception ex)
+                {
+                    // Выводим сообщение об ошибке при удалении записи
+                    MessageBox.Show($"Ошибка при удалении записи из таблицы rooms: {ex.Message}");
+                }
             }
         }
 
