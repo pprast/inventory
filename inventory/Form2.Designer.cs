@@ -372,6 +372,7 @@
             this.teacher_insert.TabIndex = 11;
             this.teacher_insert.Text = "добавить";
             this.teacher_insert.UseVisualStyleBackColor = true;
+            this.teacher_insert.Click += new System.EventHandler(this.teacher_insert_Click);
             // 
             // room_delete
             // 
@@ -382,6 +383,7 @@
             this.room_delete.TabIndex = 18;
             this.room_delete.Text = "удалить";
             this.room_delete.UseVisualStyleBackColor = true;
+            this.room_delete.Click += new System.EventHandler(this.room_delete_Click);
             // 
             // teacher_delete
             // 
@@ -392,6 +394,7 @@
             this.teacher_delete.TabIndex = 17;
             this.teacher_delete.Text = "удалить";
             this.teacher_delete.UseVisualStyleBackColor = true;
+            this.teacher_delete.Click += new System.EventHandler(this.teacher_delete_Click);
             // 
             // room_insert
             // 
@@ -402,6 +405,7 @@
             this.room_insert.TabIndex = 12;
             this.room_insert.Text = "добавить";
             this.room_insert.UseVisualStyleBackColor = true;
+            this.room_insert.Click += new System.EventHandler(this.room_insert_Click);
             // 
             // Form2
             // 

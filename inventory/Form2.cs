@@ -214,7 +214,6 @@ namespace inventory
             int id = Convert.ToInt32(room_info_viewDataGridView.SelectedRows[0].Cells[0].Value);
 
             // Создаем подключение к базе данных
-            string connectionString = "Data Source=DESKTOP-6HOINII;Initial Catalog=univer;Integrated Security=True";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 try
